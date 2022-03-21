@@ -1,0 +1,64 @@
+# We have applied random forest classifier on the provided dataset. I will explain each and every step one by one.
+# Importing required libraries.
+library(caret)
+library(randomForest)
+
+# Read the dataset and print top 6 rows to see how the data looks like.
+
+data <- read.csv('data (1).csv')
+head(data)
+
+
+# Check total number of rows and columns in the dataset.
+nrow(data)
+ncol(data)
+
+# Drop all null values from the dataset.
+data <- na.omit(data)
+
+# Check if null values are removed. If the sum is 0 then that means no null values are present.
+
+sum(is.na(data))
+
+# Print head
+head(data)
+
+
+# Divide the data into training and testing set. A split of 70% and 30% is used for training and testing respectively.
+ind <- sample(2, nrow(data), replace = TRUE, prob = c(0.7, 0.3))
+train <- data[ind==1,]
+test <- data[ind==2,]
+
+
+# Initiate a random forest classifier. As the target variable is a binary variable hence we will factor it. All other features will be used to train the model.
+rf <- randomForest(factor(y) ~., data=train, proximity=TRUE)
+
+# Printing a summary of the trained model
+print(rf)
+
+# Perform predictions on the training set and print confusion matrix to see True positives, flase positives, true negatives, false negatives. We can see that accuracy score is 99.79% on training set.
+p1 <- predict(rf, train)
+confusionMatrix(p1, factor(train$y))
+
+# Use 30% test data for predictions.
+p2 <- predict(rf, test)
+
+# Calcualte a confusion matrix and we can see that the accuracy on the test set is 91.38% which is good.
+confusionMatrix(p2, factor(test$y))
+
+# Plot the most important features of the dataset.
+varImpPlot(rf)
+
+# Read the testing dataset to perform predictions.
+test_data <- read.csv('test.csv')
+head(test_data)
+
+# Perform prediction on given test sets.
+p2 <- predict(rf, test_data)
+
+# Display classification results.
+table(p2)
+
+
+
+

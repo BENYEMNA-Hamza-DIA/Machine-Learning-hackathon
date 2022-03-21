@@ -1,0 +1,123 @@
+### Question 1
+library(MASS)
+library(caTools)
+set.seed(18)
+Boston_idx = sample(1:nrow(Boston), nrow(Boston) / 2) 
+Boston_train = Boston[Boston_idx,]
+Boston_test  = Boston[-Boston_idx,]
+
+### Question 2
+library(rpart)
+Boston_tree = rpart(medv ~ ., data = Boston_train)
+
+### Question 3
+plot(Boston_tree)
+text(Boston_tree, pretty = 0)
+title(main = "Regression Tree")
+
+### Question 4
+library(rpart.plot)
+rpart.plot(Boston_tree)
+prp(Boston_tree)
+
+### Question 5
+summary(Boston_tree)
+printcp(Boston_tree)
+plotcp(Boston_tree)
+
+### Question 6
+rmse = function(actual, predicted) {
+  sqrt(mean((actual - predicted) ^ 2))
+}
+
+### Question 7
+Boston_tree_pred = predict(Boston_tree, newdata = Boston_test)
+rmse(Boston_tree_pred, Boston_test$medv)
+
+### Question 8
+Boston_lm = lm(medv ~ ., data = Boston_train)
+Boston_lm_pred = predict(Boston_lm, newdata = Boston_test)
+rmse(Boston_lm_pred, Boston_test$medv)
+
+### Question 9
+library(randomForest)
+Boston_bagging = randomForest(medv ~ ., data = Boston_train, mtry = 13,
+                              importance = TRUE, ntrees = 500)
+Boston_bagging
+
+### Question 10
+Boston_bagging_pred = predict(Boston_bagging, newdata = Boston_test)
+rmse(Boston_bagging_pred, Boston_test$medv)
+
+# yes, it is better than linear regression regression or simple tree
+#the number of error is very low and decreasing
+
+### Question 11
+Boston_forest = randomForest(medv ~ ., data = Boston_train, mtry = 4,
+                             importance = TRUE, ntrees = 500)
+Boston_forest
+
+Boston_forest_pred = predict(Boston_forest, newdata = Boston_test)
+rmse(Boston_forest_pred, Boston_test$medv)
+
+### Question 12
+importance(Boston_forest, type = 1)
+
+### Question 13
+varImpPlot(Boston_forest, type = 1)
+
+### Question 14
+library(gbm)
+Boston_boost = gbm(medv ~ ., data = Boston_train, distribution = "gaussian", 
+                   n.trees = 5000, interaction.depth = 4, shrinkage = 0.01)
+
+Boston_boost_pred = predict(Boston_boost, newdata = Boston_test)
+rmse(Boston_boost_pred, Boston_test$medv)
+
+### Question 15
+summary(Boston_boost)
+
+### Question 16
+par(mfrow=c(2,2))
+plot(Boston_tree_pred, Boston_test$medv, 
+     xlab = "Predicted", ylab = "Actual", 
+     main = "Predicted vs Actual: Single Tree, Test Data",
+     col = "#cd0050", pch = 20)
+grid()
+abline(0, 1, col = "dodgerblue", lwd = 2)
+
+plot(Boston_bagging_pred, Boston_test$medv,
+     xlab = "Predicted", ylab = "Actual",
+     main = "Bagging, Test Data",
+     col = "#cd0050", pch = 20)
+grid()
+abline(0, 1, col = "dodgerblue", lwd = 2)
+
+plot(Boston_forest_pred, Boston_test$medv,
+     xlab = "Predicted", ylab = "Actual",
+     main = "Random Forest, Test Data",
+     col = "#cd0050", pch = 20)
+grid()
+abline(0, 1, col = "dodgerblue", lwd = 2)
+
+plot(Boston_boost_pred, Boston_test$medv,
+     xlab = "Predicted", ylab = "Actual",
+     main = "Boosting, Test Data",
+     col = "#cd0050", pch = 20)
+grid()
+abline(0, 1, col = "dodgerblue", lwd = 2)
+
+#SPAM
+
+calc_acc = function(predicted, actual) {mean(predicted == actual)}
+dataset$spam = as.factor(dataset$spam)
+
+classifier.logreg <- glm(spam ~ ., family = "binomial", data=training_set)
+classifier.logreg
+summary(classifier.logreg)
+pred.glm = predict(classifier.logreg, newdata = test_set, type="response")
+
+pred.glm_T_F = ifelse(pred.glm >= 0.5, TRUE,FALSE)
+
+acc_logreg = calc_acc(pred.glm_T_F, test_set$spam)
+
